@@ -117,9 +117,9 @@ def talker():
 				i+=1
 				if i==30:
 					init_heading = heading
-					print ("Initial Heading----------------------------------------------------")
-					print(init_heading)
-					print("--------------------------------------------------------------------")
+					#print ("Initial Heading----------------------------------------------------")
+					#print(init_heading)
+					#print("--------------------------------------------------------------------")
 					robot.roll(0,0)
 
 			# Kalman
@@ -156,21 +156,44 @@ def talker():
 							heading_error = -1 * heading_error
 						else:
 							pass
- 
+
+					"""
+					# Obstacle Avoidance
+					obstacle_field_force = 0.0
+					speed_force_field = 0.0
+					blob_buff = blobs
+					my_blob = localiser(position,blob_buff)
+					blob_buff.remove(my_blob)
+
+					for blob in blob_buff:
+						mv = multivariate_normal(blob, [[15.0, 0.0], [0.0, 15.0]])
+						smv = multivariate_normal(blob, [[20.0, 0.0], [0.0, 20.0]])
+						obstacle_field_force += (mv.pdf((position[0],position[1]))*150000)
+						speed_force_field    += (smv.pdf((position[0],position[1]))*150000)
+					obstacle_field_force = min(int(obstacle_field_force),90)	
+					"""
+
+					# PID
 					dist = np.linalg.norm(np.array(position)-np.array(goal))
 					old_dist = np.linalg.norm(np.array(position_old)-np.array(goal))
 					dist_sum += dist
-					speed = int(guass(0.0,9.0,(angle_to_goal-steering+heading_error)/100.0) * (15*dist + 190*(old_dist - dist) + 0.00000001*dist_sum))
+					
+					#if obstacle_field_force <1:
+					speed = int(guass(0.0,8.0,(angle_to_goal-steering+heading_error)/100.0) * (15*dist + 190*(old_dist - dist) + 0.00000001*dist_sum))
+
 					steering = int((heading+heading_error)%360-init_heading)%360
-					robot.roll(max(min(speed,100),0),steering)
+					#steering = (steering-obstacle_field_force)%360
+
+					robot.roll(max(min(speed,30),0),steering)
 					#print ("cte      ",cte)
 					#print ("u        ",u)
 					#print ("speed    ",speed)
 					#print ("steering ",steering)
+					#print ("obstacleF",obstacle_field_force)
 					print ("position ",position)
 					print ("heading  ",heading)
 					print ("goal     ",goal)
-					print ("init_h   ",init_heading)
+					#print ("init_h   ",init_heading)
 					print ("")
 
 			p = Point32()

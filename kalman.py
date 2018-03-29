@@ -19,6 +19,6 @@ def filter(x,P,dt,Z):
 
 u = np.matrix([[0.], [0.], [0.], [0.]]) # external motion
 H = np.matrix([[1.,0.0,0.0,0.0],[0.0,1.0,0.0,0.0]]) # measurement function
-R = np.matrix([[0.003,0.0],[0.0,0.003]]) # measurement uncertainty #both were 0.001
-Q = np.matrix([[0.003,0.0,0.0,0.0],[0.0,0.003,0.0,0.0],[0.0,0.0,0.003,0.0],[0.0,0.0,0.0,0.003]]) # process noise
+R = np.matrix([[0.001,0.0],[0.0,0.001]]) # measurement uncertainty #both were 0.003
+Q = np.matrix([[0.001,0.0,0.0,0.0],[0.0,0.001,0.0,0.0],[0.0,0.0,0.001,0.0],[0.0,0.0,0.0,0.001]]) # process noise 0.001
 I = np.matrix([[1.0,0.,0.,0.],[.0,1.0,.0,.0],[.0,.0,1.0,.0],[.0,.0,.0,1.0]]) # identity matrix
