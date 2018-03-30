@@ -5,7 +5,6 @@ import time
 import numpy as np
 import kalman 
 from geometry_msgs.msg import Polygon,Point32
-from scipy.stats import multivariate_normal
 
 robot_number = "1"
 
@@ -17,6 +16,7 @@ goal = []
 heading = None
 init_heading = None
 dist_sum = 0.0
+lights_off = False
 
 number_of_robots = None
 
@@ -32,9 +32,12 @@ def guass(mu, sigma2, x):
 def update_blob(data):
 	global blobs
 	buff = []
-	for blob in data.points:
-		buff.append([blob.x,blob.y])
-		blobs = buff
+	if len(data.points)!= 0:
+		for blob in data.points:
+			buff.append([blob.x,blob.y])
+			blobs = buff
+	else:
+		blobs = []
 
 def goal_setter(data):
 	global goal
@@ -47,7 +50,7 @@ def localiser(position,blobs):
 
 
 def talker():
-	global position,heading,init_heading,blobs,x,P,goal,real_head,steering,dist_sum
+	global position,heading,init_heading,blobs,x,P,goal,real_head,steering,dist_sum,lights_off
 
 	init = (rospy.get_param("init"))
 	connections = [init[a] for a in init]
@@ -74,16 +77,25 @@ def talker():
 
 		# All Robot Connection Wait
 		if (rospy.get_param("init/sphero"+robot_number)) and not (rospy.get_param("connection_established")):
+			#robot.set_rgb_led(255,0,0)
 			pass
 
 		# Robots Initial Localisation
 		if (rospy.get_param("connection_established")) and not (rospy.get_param("all_robot_localised")):
 
-			robot.set_rgb_led(0,0,0)
+			try:
+				robot.set_rgb_led(0,0,1)
+				print("Lightsoff")
+				print ("Blobs",blobs)
+				if len(blobs)==0:
+					lights_off = True
+			except AttributeError:
+				pass
+
 			locate = (rospy.get_param("locate"))
 			initial_location = [locate[a] for a in locate]
 
-			if not (rospy.get_param("locate/sphero"+robot_number)) and ((int(robot_number) == 1) or (rospy.get_param("locate/sphero"+str((int(robot_number)-1)%len(initial_location))) == 1)):
+			if (not (rospy.get_param("locate/sphero"+robot_number)) and ((int(robot_number) == 1) or (rospy.get_param("locate/sphero"+str((int(robot_number)-1)%len(initial_location))) == 1))) and lights_off:
 				robot.set_rgb_led(255,255,255)
 				time.sleep(.5)
 
@@ -94,12 +106,14 @@ def talker():
 						initial_xy = position
 						x = np.matrix([[position[0]], [position[1]], [0.0], [0.0]])
 						dt_log = time.time()
-						robot.set_rgb_led(0,0,0)
+						robot.set_rgb_led(0,0,1)
 						rospy.set_param("locate/sphero"+robot_number, True)
 						print ("Setting Robot "+ robot_number +" position to ",position)
 
 					else:
 						pass
+
+
 
 		# Robot State Estimation and Controls
 		if (rospy.get_param("all_robot_localised")):
@@ -112,16 +126,18 @@ def talker():
 
 			# Finds initial Heading
 			if heading == None:
-				robot.roll(10,0)
-				i = 0
+				robot.roll(15,0)
+				#i = 0
 			if init_heading==None and heading!=None:
-				i+=1
-				if i==30:
+				#i+=1
+				if np.linalg.norm(np.array(position)-np.array(initial_xy)) > 5.0 :
 					init_heading = heading
 					#print ("Initial Heading----------------------------------------------------")
 					#print(init_heading)
 					#print("--------------------------------------------------------------------")
 					robot.roll(0,0)
+				else:
+					robot.roll(15,0)
 
 			# Kalman
 			now = time.time()
@@ -192,7 +208,7 @@ def talker():
 					#print ("steering ",steering)
 					#print ("obstacleF",obstacle_field_force)
 					print ("position ",position)
-					print ("heading  ",heading)
+					#print ("heading  ",heading)
 					print ("goal     ",goal)
 					#print ("init_h   ",init_heading)
 					print ("")
@@ -204,7 +220,6 @@ def talker():
 			pub_location.publish(p)
 
 		else:
-			robot.set_rgb_led(0,0,0)
 			pass
 			
 		rate.sleep()
