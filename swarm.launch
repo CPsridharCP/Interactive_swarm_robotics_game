@@ -1,0 +1,33 @@
+<launch>
+
+	<node pkg='sphero_cp_pkg' type='swarm.py' name='swarm_brain' />
+
+	<node pkg='sphero_cp_pkg' type='blobDetection.py' name='camera'/>
+
+	<node pkg='sphero_cp_pkg' type='stateManager.py' name='stateManager' output="screen"/>
+	<param name="connection_established" value= "False" type="boolean" />
+	<param name="all_robot_localised" value= "False" type="boolean" />
+
+	<node pkg='sphero_cp_pkg' type='sphero.py' args='1 C9:93:8F:F1:91:E2' name='sphero1' output="screen"/>
+	<node pkg='sphero_cp_pkg' type='sphero.py' args='2 DA:06:00:55:3A:8D' name='sphero2'/>
+	<node pkg='sphero_cp_pkg' type='sphero.py' args='3 DC:F3:09:7B:4D:BB' name='sphero3'/>
+	<node pkg='sphero_cp_pkg' type='sphero.py' args='4 F5:8F:A1:93:56:40' name='sphero4'/>
+	<node pkg='sphero_cp_pkg' type='sphero.py' args='5 ED:4D:95:7A:91:4A' name='sphero5'/>
+
+
+	<param name="init/sphero1" value= "False" type="boolean" />
+	<param name="locate/sphero1" value= "False" type="boolean" />
+
+	<param name="init/sphero2" value= "False" type="boolean" />
+	<param name="locate/sphero2" value= "False" type="boolean" />
+
+	<param name="init/sphero3" value= "False" type="boolean" />
+	<param name="locate/sphero3" value= "False" type="boolean" />
+	
+	<param name="init/sphero4" value= "False" type="boolean" />
+	<param name="locate/sphero4" value= "False" type="boolean" />
+
+	<param name="init/sphero5" value= "False" type="boolean" />
+	<param name="locate/sphero5" value= "False" type="boolean" />
+
+</launch>
