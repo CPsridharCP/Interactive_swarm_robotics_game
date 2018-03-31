@@ -104,6 +104,7 @@ def talker():
 					if len(blobs) == 1:
 						position = [blobs[0][0],blobs[0][1]]
 						initial_xy = position
+						goal = position
 						x = np.matrix([[position[0]], [position[1]], [0.0], [0.0]])
 						dt_log = time.time()
 						robot.set_rgb_led(0,0,1)
