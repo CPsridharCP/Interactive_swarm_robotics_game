@@ -13,12 +13,6 @@
 	<node pkg='sphero_cp_pkg' type='sphero.py' args='3 DC:F3:09:7B:4D:BB' name='sphero3'/>
 	<node pkg='sphero_cp_pkg' type='sphero.py' args='4 F5:8F:A1:93:56:40' name='sphero4'/>
 	<node pkg='sphero_cp_pkg' type='sphero.py' args='5 ED:4D:95:7A:91:4A' name='sphero5'/>
-	<node pkg='sphero_cp_pkg' type='sphero.py' args='6 D9:76:62:17:4C:2C' name='sphero6'/>
-	<node pkg='sphero_cp_pkg' type='sphero.py' args='7 DA:1B:BF:DB:C7:1D' name='sphero7'/>
-	<node pkg='sphero_cp_pkg' type='sphero.py' args='8 CE:67:40:A9:C5:29' name='sphero8'/>
-	<node pkg='sphero_cp_pkg' type='sphero.py' args='9 C9:8E:91:DB:1F:F3' name='sphero9'/>
-	<node pkg='sphero_cp_pkg' type='sphero.py' args='10 E5:3B:BA:D9:67:D7' name='sphero10'/>
-
 
 	<param name="init/sphero1" value= "False" type="boolean" />
 	<param name="locate/sphero1" value= "False" type="boolean" />
@@ -34,20 +28,5 @@
 
 	<param name="init/sphero5" value= "False" type="boolean" />
 	<param name="locate/sphero5" value= "False" type="boolean" />
-
-	<param name="init/sphero6" value= "False" type="boolean" />
-	<param name="locate/sphero6" value= "False" type="boolean" />
-
-	<param name="init/sphero7" value= "False" type="boolean" />
-	<param name="locate/sphero7" value= "False" type="boolean" />
-
-	<param name="init/sphero8" value= "False" type="boolean" />
-	<param name="locate/sphero8" value= "False" type="boolean" />
-
-	<param name="init/sphero9" value= "False" type="boolean" />
-	<param name="locate/sphero9" value= "False" type="boolean" />
-
-	<param name="init/sphero10" value= "False" type="boolean" />
-	<param name="locate/sphero10" value= "False" type="boolean" />
 
 </launch>
