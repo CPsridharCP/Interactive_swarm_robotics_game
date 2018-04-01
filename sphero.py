@@ -14,6 +14,7 @@ robot = Sphero(str(sys.argv[2]))
 blobs = []
 position = []
 goal = []
+color = [255,0,0]
 heading = None
 init_heading = None
 dist_sum = 0.0
@@ -44,6 +45,11 @@ def goal_setter(data):
 	global goal
 	goal = [data.x,data.y]
 
+def color_setter(data):
+	global color
+	color = [int(data.x),int(data.y),int(data.z)]
+	print (color)
+
 def localiser(position,blobs):
 	buff_localiser = blobs
 	dist_index = [[np.linalg.norm(np.array(position)-np.array(blob)),index] for index, blob in enumerate(buff_localiser)]
@@ -51,7 +57,7 @@ def localiser(position,blobs):
 
 
 def talker():
-	global position,heading,init_heading,blobs,x,P,goal,real_head,steering,dist_sum,lights_off
+	global position,heading,init_heading,blobs,x,P,goal,real_head,steering,dist_sum,lights_off,color
 
 	init = (rospy.get_param("init"))
 	connections = [init[a] for a in init]
@@ -63,6 +69,7 @@ def talker():
 
 	rospy.Subscriber('/blobDetection', Polygon, update_blob)
 	rospy.Subscriber("/goal/robot"+robot_number, Point32, goal_setter)
+	rospy.Subscriber("/color/robot"+robot_number, Point32, color_setter)
 
 	while not rospy.is_shutdown():
 
@@ -78,7 +85,7 @@ def talker():
 
 		# All Robot Connection Wait
 		if (rospy.get_param("init/sphero"+robot_number)) and not (rospy.get_param("connection_established")):
-			#robot.set_rgb_led(255,0,0)
+			robot.set_rgb_led(255,0,0)
 			pass
 
 		# Robots Initial Localisation
@@ -86,8 +93,8 @@ def talker():
 
 			try:
 				robot.set_rgb_led(0,0,1)
-				print("Lightsoff")
-				print ("Blobs",blobs)
+				#print("Lightsoff")
+				#print ("Blobs",blobs)
 				if len(blobs)==0:
 					lights_off = True
 			except AttributeError:
@@ -119,8 +126,8 @@ def talker():
 
 		# Robot State Estimation and Controls
 		if (rospy.get_param("all_robot_localised")):
-			robot.set_rgb_led(0,255,0)
-			robot.roll(0,0)
+			robot.set_rgb_led(color[0],color[1],color[2])
+			#robot.roll(0,0)
 			
 			# Tracking
 			if len(blobs) == number_of_robots:
@@ -191,6 +198,7 @@ def talker():
 						speed_force_field    += (smv.pdf((position[0],position[1]))*150000)
 					obstacle_field_force = min(int(obstacle_field_force),90)	
 					"""
+					#robot.set_rgb_led(color[0],color[1],color[2])
 
 					# PID
 					dist = np.linalg.norm(np.array(position)-np.array(goal))
@@ -209,11 +217,11 @@ def talker():
 					#print ("speed    ",speed)
 					#print ("steering ",steering)
 					#print ("obstacleF",obstacle_field_force)
-					print ("position ",position)
+					#print ("position ",position)
 					#print ("heading  ",heading)
-					print ("goal     ",goal)
+					#print ("goal     ",goal)
 					#print ("init_h   ",init_heading)
-					print ("")
+					#print ("")
 
 			p = Point32()
 			p.x = position[0]

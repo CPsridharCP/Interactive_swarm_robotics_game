@@ -10,11 +10,13 @@ import numpy as np
 robot_xy = ['']
 goal_xy =['']
 goal_publishers = {}
+color_publishers = {}
 goal_reached = False
 goal_error = 100.0
 number_of_formations = 0
 formations_names = []
 formation_changed = True
+in_formation = False
 
 angle = 0
 current_formation = ""
@@ -46,13 +48,14 @@ def robot_locations(data,robot_number):
 	robot_xy[robot_number] = [data.x,data.y]
 
 def talker():
-	global robot_xy,angle,goal_xy,corner_centre,goal_error,number_of_formations,current_formation,formation_changed
+	global robot_xy,angle,goal_xy,corner_centre,goal_error,number_of_formations,current_formation,formation_changed, in_formation,goal_publishers,color_publishers
 
 	rate = rospy.Rate(10)
 
 	for i in range(number_of_robots):
 		rospy.Subscriber("/location/robot"+str(i+1), Point32, robot_locations,i)
 		goal_publishers["pub{0}".format(i+1)] = rospy.Publisher("goal/robot"+str(i+1), Point32, queue_size = 10)
+		color_publishers["pub{0}".format(i+1)] = rospy.Publisher("color/robot"+str(i+1), Point32, queue_size = 10)
 
 	## SWARM MATH GOES HERE
 
@@ -80,12 +83,25 @@ def talker():
 				p.y = goal_xy[goal_index][1]
 				goal_error += np.linalg.norm(np.array(robot_xy[i])-np.array(goal_xy[goal_index]))
 				goal_publishers["pub"+str(i+1)].publish(p)
+
+				c = Point32()
+				if in_formation:
+					c.x = 0.0
+					c.y = 130.0
+					c.z = 255.0
+				else:
+					c.x = 255.0
+					c.y = 0.0
+					c.z = 0.0
+				color_publishers["pub"+str(i+1)].publish(c)
+
 				#print ("GOAL | ",(x_g,y_g))
 
 			if goal_error < (3.0 * number_of_robots) and formation_changed :
 				goal_reached = True
 				formation_changed = False
 				goal_reached_time = time.time()
+				in_formation = True
 			else:
 				if formation_changed:
 					goal_reached = False
@@ -97,6 +113,7 @@ def talker():
 				current_formation = formations_names[(formations_names.index(current_formation)+1)%number_of_formations]
 				goal_xy = formations[current_formation]
 				formation_changed = True
+				in_formation = False
 			
 			print ("goal_reached |", goal_reached, "|",goal_error, "|",current_formation)
 
