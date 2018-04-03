@@ -48,7 +48,7 @@ def goal_setter(data):
 def color_setter(data):
 	global color
 	color = [int(data.x),int(data.y),int(data.z)]
-	print (color)
+	#print (color)
 
 def localiser(position,blobs):
 	buff_localiser = blobs
@@ -121,7 +121,6 @@ def talker():
 
 					else:
 						pass
-
 
 
 		# Robot State Estimation and Controls
@@ -206,7 +205,7 @@ def talker():
 					dist_sum += dist
 					
 					#if obstacle_field_force <1:
-					speed = int(guass(0.0,8.0,(angle_to_goal-steering+heading_error)/100.0) * (15*dist + 190*(old_dist - dist) + 0.00000001*dist_sum))
+					speed = int(guass(0.0,8.0,(angle_to_goal-steering+heading_error)/100.0) * (15*dist + 180*(old_dist - dist) + 0.00000001*dist_sum))
 
 					steering = int((heading+heading_error)%360-init_heading)%360
 					#steering = (steering-obstacle_field_force)%360

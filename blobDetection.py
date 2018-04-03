@@ -7,17 +7,27 @@ import rospy
 from geometry_msgs.msg import Polygon,Point32
 from math import cos,sin,radians
 
-greenLower = (100,0, 0)
+#greenLower = (100,0,0) #was 100 00 00
+#greenUpper = (255,255,255)
+
+redLower = (0,100,100) 
+redUpper = (255,255,255)
+
+greenLower = (100,0,100)
 greenUpper = (255,255,255)
 
+blueLower = (100,100,0) 
+blueUpper = (255,255,255)
+
+
 def map_to_pix(x,y):
-	x = x*7
-	y = (50 + (50-y))*7
+	x = x*9
+	y = (50 + (50-y))*9
 	return x,y
 
 def map_to_xy(x,y):
-	x = int(x//7)
-	y = 50 + (50-(int(y//7)))
+	x = int(x//9)
+	y = 50 + (50-(int(y//9)))
 	return x,y
 
 
@@ -35,12 +45,23 @@ def talker():
 		frame = imutils.resize(frame, width=1200)
 		height = np.size(frame,0)
 		width = np.size(frame,1)
-		frame = frame[int(1.3*height/10):int(9.1*height/10), int(1.75*width/10):int(7.6*width/10)]
+		#frame = frame[int(1.3*height/10):int(9.1*height/10), int(1.75*width/10):int(7.6*width/10)]
+		frame = frame[0:height, int(1.33*width/10):int(8.83*width/10)]
 		
 		blurred = cv2.GaussianBlur(frame, (15, 15), 0)
-		mask = cv2.inRange(blurred, greenLower, greenUpper)
-		#kernel = np.ones((3,3),np.uint8) # was 15,15 
-		#mask = cv2.erode(mask, kernel, iterations=2)
+		#mask = cv2.inRange(blurred, greenLower, greenUpper)
+
+		mask1 = cv2.inRange(blurred, greenLower, greenUpper)
+
+		mask2 = cv2.inRange(blurred, redLower, redUpper)
+
+		mask3 = cv2.inRange(blurred, blueLower, blueUpper)
+
+		mask = cv2.add(cv2.add(mask1,mask2),mask3)
+		
+		################################################################# next two lines - only for light
+		kernel = np.ones((7,7),np.uint8) # was 15,15 #Non Dilate 3 3
+		mask = cv2.erode(mask, kernel, iterations=2)
 		#cv2.imshow("test",mask)
 
 		cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[-2]
