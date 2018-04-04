@@ -6,6 +6,7 @@ import numpy as np
 import kalman 
 from geometry_msgs.msg import Polygon,Point32
 import sys
+from scipy.stats import multivariate_normal
 
 robot_number = str(sys.argv[1])
 
@@ -185,18 +186,27 @@ def talker():
 					"""
 					# Obstacle Avoidance
 					obstacle_field_force = 0.0
-					speed_force_field = 0.0
+					#speed_force_field = 0.0
 					blob_buff = blobs
 					my_blob = localiser(position,blob_buff)
 					blob_buff.remove(my_blob)
 
 					for blob in blob_buff:
-						mv = multivariate_normal(blob, [[15.0, 0.0], [0.0, 15.0]])
-						smv = multivariate_normal(blob, [[20.0, 0.0], [0.0, 20.0]])
-						obstacle_field_force += (mv.pdf((position[0],position[1]))*150000)
-						speed_force_field    += (smv.pdf((position[0],position[1]))*150000)
+						mv = multivariate_normal(blob, [[16.0, 0.0], [0.0, 16.0]])
+						#smv = multivariate_normal(blob, [[20.0, 0.0], [0.0, 20.0]])
+						field_now = (mv.pdf((position[0],position[1]))*150000)
+						
+						#if field_now > 0.0:
+						#	to_obstacle_vec = np.array(blob)-np.array(position)
+						#	to_obstacle_buff = int(np.arctan2(to_obstacle_vec[1],to_obstacle_vec[0]) * 180 / np.pi)
+						#	angle_to_obstacle = -1*to_obstacle_buff if to_obstacle_buff <= 0.0 else 360.0-to_obstacle_buff
+
+
+						obstacle_field_force += field_now
+						#speed_force_field    += (smv.pdf((position[0],position[1]))*150000)
 					obstacle_field_force = min(int(obstacle_field_force),90)	
 					"""
+					
 					#robot.set_rgb_led(color[0],color[1],color[2])
 
 					# PID
@@ -205,12 +215,15 @@ def talker():
 					dist_sum += dist
 					
 					#if obstacle_field_force <1:
-					speed = int(guass(0.0,8.0,(angle_to_goal-steering+heading_error)/100.0) * (15*dist + 180*(old_dist - dist) + 0.00000001*dist_sum))
+					speed = int(guass(0.0,8.0,(angle_to_goal-steering+heading_error)/100.0) * (15*dist + 180*(old_dist - dist) + 0.00000001*dist_sum)) #SW1 P 15 180 || SW2 P 18 160
 
-					steering = int((heading+heading_error)%360-init_heading)%360
+					#if obstacle_field_force == 0.0:
+					steering = int((heading+heading_error)%360-init_heading)%360 ##### CORRECT ONE
+					#else:
+					#	steering = int((heading-0.5*heading_error)%360-init_heading)%360
 					#steering = (steering-obstacle_field_force)%360
 
-					robot.roll(max(min(speed,30),0),steering)
+					robot.roll(max(min(speed,35),0),steering) #SWARM1 MIN SPEED 35|| SWARM2 MIN SPEED 40
 					#print ("cte      ",cte)
 					#print ("u        ",u)
 					#print ("speed    ",speed)
